@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define TABLE_SIZE 10 // Size of the hash table
+
+// Structure for the hash table
+struct HashTable {
+    int* table;
+    int size;
+};
+
+// Function to initialize the hash table
+void initializeHashTable(struct HashTable* hashTable, int size) {
+    hashTable->size = size;
+    hashTable->table = (int*)malloc(size * sizeof(int));
+    for (int i = 0; i < size; i++) {
+        hashTable->table[i] = -1; // -1 indicates an empty slot
+    }
+}
+
+// Hash function
+int hashFunction(int key, int size) {
+    return key % size;
+}
+
+// Function to insert a key into the hash table
+void insert(struct HashTable* hashTable, int key) {
+    int index = hashFunction(key, hashTable->size);
+
+    // Linear probing in case of collision
+    while (hashTable->table[index] != -1) {
+        index = (index + 1) % hashTable->size;
+    }
+    hashTable->table[index] = key;
+}
+
+// Function to search for a key in the hash table
+int search(struct HashTable* hashTable, int key) {
+    int index = hashFunction(key, hashTable->size);
+    int startIndex = index;
+
+    // Linear probing to find the key
+    while (hashTable->table[index] != -1) {
+        if (hashTable->table[index] == key) {
+            return index;
+        }
+        index = (index + 1) % hashTable->size;
+        if (index == startIndex) {
+            return -1; // Key not found
+        }
+    }
+    return -1; // Key not found
+}
+
+// Function to display the hash table
+void display(struct HashTable* hashTable) {
+    for (int i = 0; i < hashTable->size; i++) {
+        if (hashTable->table[i] != -1) {
+            printf("Index %d: %d\n", i, hashTable->table[i]);
+        } else {
+            printf("Index %d: Empty\n", i);
+        }
+    }
+}
+
+// Main function to demonstrate hashing with linear probing
+int main() {
+    struct HashTable hashTable;
+    initializeHashTable(&hashTable, TABLE_SIZE);
+
+    insert(&hashTable, 23);
+    insert(&hashTable, 43);
+    insert(&hashTable, 13);
+    insert(&hashTable, 27);
+    insert(&hashTable, 99);
+
+    printf("Hash table:\n");
+    display(&hashTable);
+
+    int key = 43;
+    int result = search(&hashTable, key);
+    if (result != -1) {
+        printf("Element %d found at index %d\n", key, result);
+    } else {
+        printf("Element %d not found\n", key);
+    }
+
+    key = 50;
+    result = search(&hashTable, key);
+    if (result != -1) {
+        printf("Element %d found at index %d\n", key, result);
+    } else {
+        printf("Element %d not found\n", key);
+    }
+
+    // Free the allocated memory
+    free(hashTable.table);
+
+    return 0;
+}
